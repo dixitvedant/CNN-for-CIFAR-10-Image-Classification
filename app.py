@@ -5,6 +5,14 @@ from PIL import Image
 import torchvision.transforms as transforms
 
 
+# page configuration
+st.set_page_config(
+    page_title="CIFAR-10 CNN Classifier",
+    page_icon="🧠",
+    layout="centered"
+)
+
+
 # CNN architecture (same as training)
 class CNN(nn.Module):
 
@@ -99,29 +107,71 @@ transform = transforms.Compose([
 ])
 
 
-# UI
-st.title("CIFAR-10 Image Classifier")
-
-st.write(
-"Upload image of airplane, car, bird, cat, deer, dog, frog, horse, ship, truck"
+# TITLE
+st.markdown(
+"""
+# 🧠 CIFAR-10 Image Classifier
+Deep Learning Web App using **PyTorch + Streamlit**
+"""
 )
 
 
+# DATASET DESCRIPTION
+with st.expander("📚 About CIFAR-10 Dataset"):
+
+    st.write(
+"""
+CIFAR-10 is a foundational computer vision dataset containing **60,000 32x32 pixel color images in 10 distinct classes**.
+
+It consists of:
+
+• 50,000 training images  
+• 10,000 testing images  
+
+Classes included:
+
+✈️ airplane  
+🚗 automobile  
+🐦 bird  
+🐱 cat  
+🦌 deer  
+🐶 dog  
+🐸 frog  
+🐴 horse  
+🚢 ship  
+🚚 truck  
+
+CIFAR-10 is widely used for training and benchmarking image classification models in Deep Learning.
+"""
+)
+
+
+st.markdown("---")
+
+
+# upload section
+st.subheader("📤 Upload Image")
+
 uploaded_file = st.file_uploader(
-"Upload Image",
+"Choose an image",
 type=["jpg","png","jpeg"]
 )
 
 
+# prediction
 if uploaded_file is not None:
 
     image = Image.open(uploaded_file).convert("RGB")
 
-    st.image(
-        image,
-        caption="Uploaded Image",
-        use_column_width=True
-    )
+    col1, col2 = st.columns(2)
+
+    with col1:
+
+        st.image(
+            image,
+            caption="Uploaded Image",
+            use_column_width=True
+        )
 
 
     img = transform(image)
@@ -138,11 +188,25 @@ if uploaded_file is not None:
         confidence , predicted = torch.max(probabilities,1)
 
 
-    st.success(
-        f"Prediction: {classes[predicted.item()]}"
-    )
+    with col2:
+
+        st.subheader("🔍 Prediction")
+
+        st.success(
+            classes[predicted.item()]
+        )
+
+        st.write(
+            f"Confidence: {confidence.item()*100:.2f}%"
+        )
+
+        st.progress(float(confidence.item()))
 
 
-    st.write(
-        f"Confidence: {confidence.item()*100:.2f}%"
-    )
+# footer
+st.markdown(
+"""
+---
+Made with ❤️ using PyTorch and Streamlit
+"""
+)
