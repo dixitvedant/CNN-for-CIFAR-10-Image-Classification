@@ -1,69 +1,34 @@
 import streamlit as st
 import torch
-import torch.nn as nn
 from PIL import Image
 import torchvision.transforms as transforms
+from model import CNN
 
 
-# CNN architecture (same as training)
-class CNN(nn.Module):
-
-    def __init__(self):
-
-        super(CNN,self).__init__()
-
-        self.conv_layers = nn.Sequential(
-
-            nn.Conv2d(3,32,kernel_size=3,padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2,2),
-
-            nn.Conv2d(32,64,kernel_size=3,padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2,2),
-
-            nn.Conv2d(64,128,kernel_size=3,padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2,2)
-        )
-
-        self.fc_layers = nn.Sequential(
-
-            nn.Linear(4*4*128,256),
-            nn.ReLU(),
-
-            nn.Linear(256,10)
-        )
-
-
-    def forward(self,x):
-
-        x = self.conv_layers(x)
-
-        x = x.view(x.size(0),-1)
-
-        x = self.fc_layers(x)
-
-        return x
-
+# page settings
+st.set_page_config(
+    page_title="CIFAR-10 Classifier",
+    page_icon="🧠",
+    layout="centered"
+)
 
 
 # class labels
 classes = [
-"airplane",
-"automobile",
-"bird",
-"cat",
-"deer",
-"dog",
-"frog",
-"horse",
-"ship",
-"truck"
+'airplane',
+'automobile',
+'bird',
+'cat',
+'deer',
+'dog',
+'frog',
+'horse',
+'ship',
+'truck'
 ]
 
 
-# load model
+# load trained model
 @st.cache_resource
 def load_model():
 
@@ -72,7 +37,7 @@ def load_model():
     model.load_state_dict(
         torch.load(
             "cnn_model.pth",
-            map_location=torch.device("cpu")
+            map_location="cpu"
         )
     )
 
@@ -99,29 +64,69 @@ transform = transforms.Compose([
 ])
 
 
-# UI
-st.title("CIFAR-10 Image Classifier")
+# UI HEADER
+st.markdown(
+"""
+# 🧠 CIFAR-10 Image Classifier
 
-st.write(
-"Upload image of airplane, car, bird, cat, deer, dog, frog, horse, ship, truck"
+Deep Learning Web App using **PyTorch + Streamlit**
+"""
 )
 
+
+# dataset info
+with st.expander("📚 About CIFAR-10 Dataset"):
+
+    st.write(
+"""
+CIFAR-10 is a foundational computer vision dataset containing **60,000 32x32 pixel color images** in **10 distinct classes**.
+
+Dataset split:
+
+• 50,000 training images  
+• 10,000 testing images  
+
+Classes included:
+
+✈️ airplane  
+🚗 automobile  
+🐦 bird  
+🐱 cat  
+🦌 deer  
+🐶 dog  
+🐸 frog  
+🐴 horse  
+🚢 ship  
+🚚 truck  
+
+It is widely used in machine learning for training and benchmarking image classification models.
+"""
+)
+
+
+# upload section
+st.markdown("## 📤 Upload Image")
 
 uploaded_file = st.file_uploader(
-"Upload Image",
-type=["jpg","png","jpeg"]
+    "Upload an image (jpg, png)",
+    type=["jpg","png","jpeg"]
 )
 
 
+# prediction
 if uploaded_file is not None:
 
     image = Image.open(uploaded_file).convert("RGB")
 
-    st.image(
-        image,
-        caption="Uploaded Image",
-        use_column_width=True
-    )
+    col1, col2 = st.columns(2)
+
+    with col1:
+
+        st.image(
+            image,
+            caption="Uploaded Image",
+            use_column_width=True
+        )
 
 
     img = transform(image)
@@ -133,16 +138,34 @@ if uploaded_file is not None:
 
         outputs = model(img)
 
-        probabilities = torch.nn.functional.softmax(outputs,dim=1)
+        probabilities = torch.nn.functional.softmax(outputs, dim=1)
 
-        confidence , predicted = torch.max(probabilities,1)
-
-
-    st.success(
-        f"Prediction: {classes[predicted.item()]}"
-    )
+        confidence, predicted = torch.max(probabilities,1)
 
 
-    st.write(
-        f"Confidence: {confidence.item()*100:.2f}%"
-    )
+    with col2:
+
+        st.markdown("### 🔍 Prediction Result")
+
+        st.success(
+            classes[predicted.item()]
+        )
+
+        st.write(
+            "Confidence:",
+            f"{confidence.item()*100:.2f}%"
+        )
+
+
+        st.progress(
+            float(confidence.item())
+        )
+
+
+# footer
+st.markdown(
+"""
+---
+Made using with PyTorch and Streamlit
+"""
+)
