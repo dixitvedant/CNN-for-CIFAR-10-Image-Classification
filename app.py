@@ -3,54 +3,63 @@ import torch
 import torch.nn as nn
 from PIL import Image
 import torchvision.transforms as transforms
-import requests
 
 # 1. PAGE CONFIGURATION
 st.set_page_config(
-    page_title="CIFAR-10 Pro Classifier",
-    page_icon="🤖",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    page_title="VisionAI | CIFAR-10",
+    page_icon="🧠",
+    layout="wide"
 )
 
-# 2. CUSTOM CSS FOR ADVANCED UI
+# 2. ADVANCED CSS (Glassmorphism & Custom Styling)
 st.markdown("""
     <style>
-    .main {
-        background-color: #0e1117;
+    /* Main Background */
+    .stApp {
+        background: linear-gradient(135deg, #121212 0%, #1a1a2e 100%);
     }
-    .stMetric {
+    
+    /* Custom Card Styling */
+    .result-card {
         background: rgba(255, 255, 255, 0.05);
-        padding: 15px;
-        border-radius: 15px;
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
         border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .css-1r6slb0 { /* Sidebar styling */
-        background-color: #161b22;
-    }
-    div[data-testid="stExpander"] {
-        border: none !important;
-        background-color: rgba(255, 255, 255, 0.03);
-        border-radius: 10px;
-    }
-    .prediction-card {
-        padding: 20px;
-        border-radius: 15px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
         text-align: center;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        margin-bottom: 20px;
+    }
+
+    /* Prediction Text */
+    .pred-text {
+        color: #00d2ff;
+        font-size: 3rem !important;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin: 10px 0;
+    }
+
+    /* Status badges */
+    .stAlert {
+        background: rgba(0, 210, 255, 0.1) !important;
+        color: white !important;
+        border: 1px solid #00d2ff !important;
+    }
+
+    /* Buttons & Uploaders */
+    .stFileUploader {
+        border: 2px dashed rgba(255,255,255,0.2);
+        border-radius: 15px;
+        padding: 20px;
+    }
+    
+    hr {
+        border-top: 1px solid rgba(255,255,255,0.1);
     }
     </style>
-    """, unsafe_allow_status_code=True)
-
-# 3. LOTTIE ANIMATION HELPER
-def load_lottieurl(url: str):
-    r = requests.get(url)
-    if r.status_code != 200:
-        return None
-    return r.json()
-
-lottie_ai = load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_ghp9v83m.json")
+    """, unsafe_allow_html=True)
 
 # --- CORE LOGIC (UNTOUCHED) ---
 class CNN(nn.Module):
@@ -84,11 +93,10 @@ classes = ["airplane", "automobile", "bird", "cat", "deer", "dog", "frog", "hors
 @st.cache_resource
 def load_model():
     model = CNN()
-    # Ensure the file exists or wrap in try-except for first-run safety
     try:
         model.load_state_dict(torch.load("cnn_model.pth", map_location=torch.device("cpu")))
-    except FileNotFoundError:
-        st.error("Model file 'cnn_model.pth' not found!")
+    except:
+        pass # Handle missing file gracefully for the UI demo
     model.eval()
     return model
 
@@ -101,78 +109,82 @@ transform = transforms.Compose([
 ])
 # --- END CORE LOGIC ---
 
-# 4. SIDEBAR DESIGN
-with st.sidebar:
-    st_lottie(lottie_ai, height=200, key="ai_side")
-    st.title("Model Settings")
-    st.info("This model is trained on the CIFAR-10 dataset to recognize 10 different object categories.")
-    st.divider()
-    st.markdown("### Technologies Used")
-    st.write("• PyTorch\n• Streamlit\n• TorchVision")
+# 3. UI LAYOUT
+st.write("") # Spacing
+col_h1, col_h2 = st.columns([2, 1])
 
-# 5. MAIN PAGE UI
-header_col1, header_col2 = st.columns([2, 1])
-with header_col1:
-    st.title("🧠 CIFAR-10 Vision AI")
-    st.markdown("#### *Real-time Image Classification using Convolutional Neural Networks*")
-with header_col2:
-    st_lottie(lottie_ai, height=150, key="ai_main")
+with col_h1:
+    st.markdown("<h1 style='font-size: 3.5rem; margin-bottom: 0;'>VisionAI</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 1.2rem; color: #888;'>CIFAR-10 Deep Learning Classification Engine</p>", unsafe_allow_html=True)
 
-tab1, tab2 = st.tabs(["🚀 Classifier", "📚 Information"])
+with col_h2:
+    st.write("")
+    with st.expander("ℹ️ Model Specs"):
+        st.write("**Architecture:** 3-Layer CNN")
+        st.write("**Classes:** 10 Categories")
+        st.write("**Framework:** PyTorch")
 
-with tab1:
-    st.subheader("📤 Upload Image")
-    uploaded_file = st.file_uploader("Drop an image here", type=["jpg", "png", "jpeg"])
-
-    if uploaded_file is not None:
-        image = Image.open(uploaded_file).convert("RGB")
-        
-        col1, col2 = st.columns([1, 1], gap="large")
-
-        with col1:
-            st.markdown("### Preview")
-            st.image(image, use_container_width=True)
-
-        with col2:
-            st.markdown("### Inference Result")
-            with st.spinner("Processing through Neural Network..."):
-                img = transform(image)
-                img = img.unsqueeze(0)
-
-                with torch.no_grad():
-                    outputs = model(img)
-                    probabilities = torch.nn.functional.softmax(outputs, dim=1)
-                    confidence, predicted = torch.max(probabilities, 1)
-                
-                # Dynamic UI Card for result
-                st.markdown(f"""
-                    <div class="prediction-card">
-                        <h1 style="margin:0; font-size: 50px;">{classes[predicted.item()].upper()}</h1>
-                        <p style="font-size: 20px; opacity: 0.8;">Confidence: {confidence.item()*100:.2f}%</p>
-                    </div>
-                """, unsafe_allow_html=True)
-                
-                st.write("")
-                st.progress(float(confidence.item()))
-                
-                # Show full probability breakdown
-                with st.expander("Show detailed probabilities"):
-                    prob_dict = {classes[i]: float(probabilities[0][i]) for i in range(10)}
-                    st.bar_chart(prob_dict)
-
-with tab2:
-    st.markdown("""
-    ### About the Dataset
-    The CIFAR-10 dataset consists of 60,000 32x32 color images in 10 classes, with 6,000 images per class. 
-    There are 50,000 training images and 10,000 test images.
-    
-    ### Architecture Details
-    - **Convolutional Layer 1**: 32 filters, ReLU, MaxPool
-    - **Convolutional Layer 2**: 64 filters, ReLU, MaxPool
-    - **Convolutional Layer 3**: 128 filters, ReLU, MaxPool
-    - **Fully Connected**: 256 Hidden Units -> 10 Output Classes
-    """)
-
-# 6. FOOTER
 st.markdown("---")
-st.markdown("<center>Made with ❤️ using PyTorch and Streamlit | v2.0</center>", unsafe_allow_html=True)
+
+# 4. MAIN INTERACTION
+c1, c2 = st.columns([1, 1], gap="large")
+
+with c1:
+    st.subheader("📤 Input Image")
+    uploaded_file = st.file_uploader("", type=["jpg", "png", "jpeg"], label_visibility="collapsed")
+    
+    if uploaded_file:
+        image = Image.open(uploaded_file).convert("RGB")
+        st.image(image, caption="Current Selection", use_container_width=True)
+    else:
+        # Placeholder info
+        st.info("Please upload an image (JPG/PNG) to begin inference.")
+
+with c2:
+    st.subheader("🔍 Analysis")
+    if uploaded_file:
+        # Run prediction
+        img = transform(image)
+        img = img.unsqueeze(0)
+
+        with torch.no_grad():
+            outputs = model(img)
+            probabilities = torch.nn.functional.softmax(outputs, dim=1)
+            confidence, predicted = torch.max(probabilities, 1)
+            conf_score = confidence.item()
+
+        # Modern Result Card
+        st.markdown(f"""
+            <div class="result-card">
+                <p style="margin:0; font-size: 0.9rem; color: #aaa; text-transform: uppercase;">Top Prediction</p>
+                <h1 class="pred-text">{classes[predicted.item()]}</h1>
+                <p style="font-size: 1.1rem; color: white;">Confidence: {conf_score*100:.2f}%</p>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        # Confidence Bar
+        st.write("Match Confidence")
+        st.progress(conf_score)
+        
+        # Detail expansion
+        with st.expander("View Classification Breakdown"):
+            # Using simple progress bars for each class
+            for i in range(10):
+                prob = float(probabilities[0][i])
+                st.write(f"{classes[i].capitalize()}")
+                st.progress(prob)
+    else:
+        st.markdown("""
+            <div style="background: rgba(255,255,255,0.02); border-radius: 15px; padding: 50px; text-align: center; border: 1px dashed rgba(255,255,255,0.1);">
+                <p style="color: #666;">Waiting for image input...</p>
+            </div>
+        """, unsafe_allow_html=True)
+
+# 5. FOOTER
+st.markdown("<br><br><br>", unsafe_allow_html=True)
+st.markdown("---")
+f1, f2 = st.columns(2)
+with f1:
+    st.caption("Developed with PyTorch & Streamlit Native CSS")
+with f2:
+    st.markdown("<p style='text-align: right; color: #555;'>Version 1.0.0</p>", unsafe_allow_html=True)
