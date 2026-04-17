@@ -4,7 +4,6 @@ import torch.nn as nn
 from PIL import Image
 import torchvision.transforms as transforms
 import requests
-from streamlit_lottie import st_lottie
 
 # 1. PAGE CONFIGURATION
 st.set_page_config(
