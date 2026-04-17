@@ -7,7 +7,6 @@ import torchvision.transforms as transforms
 # 1. PAGE CONFIGURATION
 st.set_page_config(
     page_title="VisionAI | CIFAR-10 Classifier",
-    page_icon="🧠",
     layout="wide"
 )
 
@@ -122,7 +121,7 @@ st.markdown("<p style='text-align: center; font-size: 1.2rem; color: #aaa;'>Deep
 st.write("")
 
 # 4. MAIN TABS
-tab1, tab2 = st.tabs(["🚀 Classifier Engine", "📚 Dataset Information"])
+tab1, tab2 = st.tabs(["Classifier Engine", "Dataset Information"])
 
 with tab1:
     col1, col2 = st.columns([1, 1], gap="large")
@@ -167,7 +166,7 @@ with tab1:
             st.write("Neural Network Probability Map")
             st.progress(conf_val)
             
-            with st.expander("📊 Full Probability Breakdown"):
+            with st.expander("Full Probability Breakdown"):
                 for i in range(len(classes)):
                     prob = float(probabilities[0][i])
                     st.write(f"**{classes[i].capitalize()}**")
@@ -176,7 +175,7 @@ with tab1:
             st.warning("Upload an image on the left to see model output.")
 
 with tab2:
-    st.markdown("## 📊 Dataset: CIFAR-10")
+    st.markdown("##Dataset: CIFAR-10")
     
     # Summary Metrics
     m1, m2, m3 = st.columns(3)
@@ -218,5 +217,4 @@ with tab2:
 
 # 5. FOOTER
 st.markdown("<br><br><br>", unsafe_allow_html=True)
-st.markdown("---")
-st.markdown("<p style='text-align: center; color: #555;'>Made with ❤️ using PyTorch + Streamlit Advanced CSS</p>", unsafe_allow_html=True)
+st.markdown("---")st.markdown("<p style='text-align: center; color: #555;'>Made with using PyTorch + Streamlit Advanced CSS</p>", unsafe_allow_html=True)
