@@ -8,7 +8,6 @@ import torchvision.transforms as transforms
 # page configuration
 st.set_page_config(
     page_title="CIFAR-10 CNN Classifier",
-    page_icon="🧠",
     layout="centered"
 )
 
@@ -110,14 +109,14 @@ transform = transforms.Compose([
 # TITLE
 st.markdown(
 """
-# 🧠 CIFAR-10 Image Classifier
+#CIFAR-10 Image Classifier
 Deep Learning Web App using **PyTorch + Streamlit**
 """
 )
 
 
 # DATASET DESCRIPTION
-with st.expander("📚 About CIFAR-10 Dataset"):
+with st.expander("About CIFAR-10 Dataset"):
 
     st.write(
 """
@@ -150,7 +149,7 @@ st.markdown("---")
 
 
 # upload section
-st.subheader("📤 Upload Image")
+st.subheader("Upload Image")
 
 uploaded_file = st.file_uploader(
 "Choose an image",
@@ -207,6 +206,6 @@ if uploaded_file is not None:
 st.markdown(
 """
 ---
-Made with ❤️ using PyTorch and Streamlit
+Made with using PyTorch and Streamlit
 """
 )
