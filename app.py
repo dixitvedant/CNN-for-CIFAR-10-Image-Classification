@@ -109,7 +109,7 @@ transform = transforms.Compose([
 # TITLE
 st.markdown(
 """
-#CIFAR-10 Image Classifier
+# CIFAR-10 Image Classifier
 Deep Learning Web App using **PyTorch + Streamlit**
 """
 )
