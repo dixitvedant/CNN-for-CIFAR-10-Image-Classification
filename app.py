@@ -116,12 +116,12 @@ transform = transforms.Compose([
 
 # 3. HEADER
 st.write("") 
-st.markdown("<h1 style='text-align: center; font-size: 4rem;'>🧠 VisionAI</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; font-size: 4rem;'> VisionAI</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; font-size: 1.2rem; color: #aaa;'>Deep Learning Image Classification Interface</p>", unsafe_allow_html=True)
 st.write("")
 
 # 4. MAIN TABS
-tab1, tab2 = st.tabs(["Classifier Engine", "Dataset Information"])
+tab1, tab2 = st.tabs([" Classifier Engine", " Dataset Information"])
 
 with tab1:
     col1, col2 = st.columns([1, 1], gap="large")
@@ -175,7 +175,7 @@ with tab1:
             st.warning("Upload an image on the left to see model output.")
 
 with tab2:
-    st.markdown("##Dataset: CIFAR-10")
+    st.markdown("## Dataset: CIFAR-10")
     
     # Summary Metrics
     m1, m2, m3 = st.columns(3)
@@ -217,4 +217,5 @@ with tab2:
 
 # 5. FOOTER
 st.markdown("<br><br><br>", unsafe_allow_html=True)
-st.markdown("---")st.markdown("<p style='text-align: center; color: #555;'>Made with using PyTorch + Streamlit Advanced CSS</p>", unsafe_allow_html=True)
+st.markdown("---")
+st.markdown("<p style='text-align: center; color: #555;'>Made with using PyTorch + Streamlit Advanced CSS</p>", unsafe_allow_html=True)
