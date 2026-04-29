@@ -61,7 +61,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- CORE LOGIC ---
+# --- CORE LOGIC (STRICTLY PRESERVED) ---
 class CNN(nn.Module):
     def __init__(self):
         super(CNN, self).__init__()
@@ -112,8 +112,9 @@ transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
 ])
+# --- END CORE LOGIC ---
 
-# --- UI START ---
+# 3. HEADER
 st.write("") 
 st.markdown("<h1 style='text-align: center; font-size: 4rem;'> VisionAI</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; font-size: 1.2rem; color: #aaa;'>Deep Learning Image Classification Interface</p>", unsafe_allow_html=True)
@@ -153,25 +154,14 @@ with tab1:
                 confidence, predicted = torch.max(probabilities, 1)
                 conf_val = confidence.item()
 
-            # OOD Threshold Logic
-            threshold = 0.5 
-
-            if conf_val < threshold:
-                st.markdown(f"""
-                    <div class="result-card" style="border: 2px solid #ff4b4b;">
-                        <p style="margin:0; font-size: 1rem; color: #ff4b4b; text-transform: uppercase; font-weight: bold;">Unrecognized Object</p>
-                        <h1 style="color: #ff4b4b; font-size: 2.5rem !important; margin: 10px 0;">OUT OF SCOPE</h1>
-                        <p style="font-size: 1.1rem; color: white;">This image does not match the 10 known classes (Confidence: {conf_val*100:.2f}%)</p>
-                    </div>
-                """, unsafe_allow_html=True)
-            else:
-                st.markdown(f"""
-                    <div class="result-card">
-                        <p style="margin:0; font-size: 1rem; color: #888; text-transform: uppercase; font-weight: bold;">Top Inference</p>
-                        <h1 class="pred-text">{classes[predicted.item()]}</h1>
-                        <p style="font-size: 1.2rem; color: white;">Confidence Level: {conf_val*100:.2f}%</p>
-                    </div>
-                """, unsafe_allow_html=True)
+            # Glassmorphism Result Card
+            st.markdown(f"""
+                <div class="result-card">
+                    <p style="margin:0; font-size: 1rem; color: #888; text-transform: uppercase; font-weight: bold;">Top Inference</p>
+                    <h1 class="pred-text">{classes[predicted.item()]}</h1>
+                    <p style="font-size: 1.2rem; color: white;">Confidence Level: {conf_val*100:.2f}%</p>
+                </div>
+            """, unsafe_allow_html=True)
             
             st.write("Neural Network Probability Map")
             st.progress(conf_val)
@@ -187,6 +177,7 @@ with tab1:
 with tab2:
     st.markdown("## Dataset: CIFAR-10")
     
+    # Summary Metrics
     m1, m2, m3 = st.columns(3)
     m1.metric("Total Images", "60,000")
     m2.metric("Training Set", "50,000")
@@ -200,7 +191,11 @@ with tab2:
         st.subheader("Technical Profile")
         st.markdown("""
         The **CIFAR-10** dataset is a foundational computer vision collection containing 
-        **60,000 32x32 pixel color images**.
+        **60,000 32x32 pixel color images**. It is widely used in machine learning for 
+        benchmarking classification algorithms.
+        
+        Because the resolution is very low ($32 \times 32$), the model must learn to recognize 
+        the core essence of shapes and patterns rather than relying on high-frequency details.
         """)
         st.success("✅ This model uses a 3-layer Convolutional Neural Network (CNN) optimized for this data.")
 
